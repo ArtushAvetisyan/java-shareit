@@ -24,10 +24,7 @@ public class UserService {
 
     public UserDto getUserById(Long id) {
         Optional<User> user = userRepository.getUserById(id);
-        if (user.isEmpty()) {
-            throw new NotFoundException("Пользователь с id " + id + " не найден");
-        }
-        return UserMapper.toUserDto(user.get());
+        return user.map(UserMapper::toUserDto).orElseThrow(() -> new NotFoundException("Пользователь с id " + id + " не найден"));
     }
 
     public UserDto createUser(UserDto userDto) {
@@ -39,23 +36,20 @@ public class UserService {
     }
 
     public UserDto updateUser(Long id, UserDto userDto) {
-        Optional<User> user = userRepository.getUserById(id);
-        if (user.isEmpty()) {
-            throw new NotFoundException("Пользователь с id " + id + " не найден");
-        }
-        User checkedUser = user.get();
-        if (userDto.getEmail() != null && !userDto.getEmail().equals(checkedUser.getEmail())) {
+        User user = userRepository.getUserById(id).orElseThrow(() -> new NotFoundException("Пользователь с id " + id + " не найден"));
+
+        if (userDto.getEmail() != null && !userDto.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(userDto.getEmail())) {
                 throw new ConflictException("Пользователь с таким email уже существует");
             }
         }
         if (userDto.getName() != null && !userDto.getName().isBlank()) {
-            checkedUser.setName(userDto.getName());
+            user.setName(userDto.getName());
         }
         if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
-            checkedUser.setEmail(userDto.getEmail());
+            user.setEmail(userDto.getEmail());
         }
-        return UserMapper.toUserDto(userRepository.updateUser(id, checkedUser));
+        return UserMapper.toUserDto(userRepository.updateUser(id, user));
     }
 
     public void deleteUser(Long id) {

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.OwnerValidationException;
 import ru.practicum.shareit.exception.ValidationException;
 
 @RestControllerAdvice
@@ -15,6 +16,13 @@ public class ExceptionGlobalHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException exception) {
         return new ErrorResponse("Объект не найден", exception.getMessage());
+    }
+
+    // NotFound так как тесты postman ожидают 404
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleOwnerValidationException(OwnerValidationException exception) {
+        return new ErrorResponse("Ошибка доступа", exception.getMessage());
     }
 
     @ExceptionHandler
