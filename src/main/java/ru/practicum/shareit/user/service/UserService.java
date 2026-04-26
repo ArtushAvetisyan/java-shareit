@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -33,7 +32,7 @@ public class UserService {
 
     public UserDto createUser(UserDto userDto) {
         if (userRepository.existsByEmail(userDto.getEmail())) {
-            throw new ValidationException("Пользователь с таким email уже существует");
+            throw new ConflictException("Пользователь с таким email уже существует");
         }
         User createdUser = userRepository.createUser(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(createdUser);

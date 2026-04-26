@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.repository.UserRepositoryImpl;
@@ -14,7 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserServiceTest{
+class UserServiceTest {
 
     private UserService userService;
     private UserRepository userRepository;
@@ -78,8 +77,8 @@ class UserServiceTest{
 
         UserDto user2 = UserDto.builder().name("User 2").email("user@yandex.ru").build();
 
-        assertThrows(ValidationException.class, () -> userService.createUser(user2),
-                "Должно быть выброшено исключение ValidationException при дубликате email");
+        assertThrows(ConflictException.class, () -> userService.createUser(user2),
+                "Должно быть выброшено исключение ConflictException при дубликате email");
     }
 
     @Test
