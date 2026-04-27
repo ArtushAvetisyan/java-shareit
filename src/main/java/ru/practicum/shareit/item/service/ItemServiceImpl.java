@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.OwnerValidationException;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemRequestDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -23,47 +24,58 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final ItemRepository itemRepository;
 
-    public List<ItemDto> getAllUserItems(Long userId) {
+    @Override
+    public List<ItemResponseDto> getAllUserItems(Long userId) {
         userService.getUserById(userId);
-        return itemRepository.getAllUserItems(userId).stream().map(ItemMapper::toItemDto).toList();
+        return itemRepository.getAllUserItems(userId).stream().map(ItemMapper::toItemResponseDto).toList();
     }
 
-    public ItemDto getItemById(Long itemId) {
+    @Override
+    public ItemResponseDto getItemById(Long itemId) {
         Item item = itemRepository.getItemById(itemId).orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
-        return ItemMapper.toItemDto(item);
+        return ItemMapper.toItemResponseDto(item);
     }
 
-    public List<ItemDto> searchItemByText(String text) {
+    @Override
+    public List<ItemResponseDto> searchItemByText(String text) {
         if (text.isBlank()) return Collections.emptyList();
-        return itemRepository.searchItemByText(text).stream().map(ItemMapper::toItemDto).toList();
+        return itemRepository.searchItemByText(text).stream().map(ItemMapper::toItemResponseDto).toList();
     }
 
-    public ItemDto createItem(Long userId, ItemDto itemDto) {
+    @Override
+    public ItemResponseDto createItem(Long userId, ItemRequestDto itemRequestDto) {
         UserDto userDto = userService.getUserById(userId);
         User owner = UserMapper.toUser(userDto);
         owner.setId(userDto.getId());
 
-        Item item = ItemMapper.toItem(itemDto);
+        Item item = ItemMapper.toItem(itemRequestDto);
         item.setOwner(owner);
-        return ItemMapper.toItemDto(itemRepository.saveItem(item));
+        return ItemMapper.toItemResponseDto(itemRepository.saveItem(item));
     }
 
-    public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) {
+    @Override
+    public ItemResponseDto updateItem(Long userId, Long itemId, ItemRequestDto itemRequestDto) {
         userService.getUserById(userId);
         Item item = itemRepository.getItemById(itemId).orElseThrow(() ->
                 new NotFoundException("Предмет с id " + itemId + " не найден"));
         if (!Objects.equals(item.getOwner().getId(), userId)) {
             throw new OwnerValidationException("Вещь не пренадлежит пользователю. Редактирование запрещено");
         }
-        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
-            item.setName(itemDto.getName());
+        if (itemRequestDto.getName() != null && !itemRequestDto.getName().isBlank()) {
+            item.setName(itemRequestDto.getName());
         }
-        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
-            item.setDescription(itemDto.getDescription());
+        if (itemRequestDto.getDescription() != null && !itemRequestDto.getDescription().isBlank()) {
+            item.setDescription(itemRequestDto.getDescription());
         }
-        if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
+        if (itemRequestDto.getAvailable() != null) {
+            item.setAvailable(itemRequestDto.getAvailable());
         }
-        return ItemMapper.toItemDto(itemRepository.saveItem(item));
+        return ItemResponseDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
+                .build();
     }
 }
