@@ -11,8 +11,7 @@ import java.util.Optional;
 @Repository
 public class ItemRepositoryImpl implements ItemRepository {
     private final Map<Long, Item> items = new LinkedHashMap<>();
-    private static final long STARTING_ID = 1L;
-    private long nextId = STARTING_ID;
+    private long nextId = 1;
 
     @Override
     public List<Item> getAllUserItems(Long userId) {
@@ -35,17 +34,14 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public Item createItem(Item item) {
-        item.setId(nextId++);
-        items.put(item.getId(), item);
-        return item;
-    }
-
-    // Понимаю, что такая реализация не совсем корректна, так как по сути мы уже обновили поля объекта по ссылке в сервисе,
-    // но решил оставить так, чтобы не сломать архитектуру
-    @Override
-    public Item updateItem(Item item) {
-        items.put(item.getId(), item);
-        return item;
+    public Item saveItem(Item item) {
+        if (item.getId() == null) {
+            item.setId(nextId++);
+            items.put(item.getId(), item);
+            return item;
+        } else {
+            items.put(item.getId(), item);
+            return item;
+        }
     }
 }
