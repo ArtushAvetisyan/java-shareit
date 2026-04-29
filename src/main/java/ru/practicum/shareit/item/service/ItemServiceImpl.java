@@ -14,7 +14,6 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,18 +26,17 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemResponseDto> getAllUserItems(Long userId) {
         userService.getUserById(userId);
-        return itemRepository.getAllUserItems(userId).stream().map(ItemMapper::toItemResponseDto).toList();
+        return itemRepository.findAllByOwnerId(userId).stream().map(ItemMapper::toItemResponseDto).toList();
     }
 
     @Override
     public ItemResponseDto getItemById(Long itemId) {
-        Item item = itemRepository.getItemById(itemId).orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
-        return ItemMapper.toItemResponseDto(item);
+        return itemRepository.findById(itemId).map(ItemMapper::toItemResponseDto)
+                .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
     }
 
     @Override
     public List<ItemResponseDto> searchItemByText(String text) {
-        if (text.isBlank()) return Collections.emptyList();
         return itemRepository.searchItemByText(text).stream().map(ItemMapper::toItemResponseDto).toList();
     }
 
@@ -50,13 +48,13 @@ public class ItemServiceImpl implements ItemService {
 
         Item item = ItemMapper.toItem(itemRequestDto);
         item.setOwner(owner);
-        return ItemMapper.toItemResponseDto(itemRepository.saveItem(item));
+        return ItemMapper.toItemResponseDto(itemRepository.save(item));
     }
 
     @Override
     public ItemResponseDto updateItem(Long userId, Long itemId, ItemRequestDto itemRequestDto) {
         userService.getUserById(userId);
-        Item item = itemRepository.getItemById(itemId).orElseThrow(() ->
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
                 new NotFoundException("Предмет с id " + itemId + " не найден"));
         if (!Objects.equals(item.getOwner().getId(), userId)) {
             throw new OwnerValidationException("Вещь не пренадлежит пользователю. Редактирование запрещено");
