@@ -28,8 +28,8 @@ public class Comment {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
     @Column(name = "created", nullable = false, columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
