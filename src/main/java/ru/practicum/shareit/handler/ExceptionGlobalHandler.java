@@ -1,6 +1,7 @@
 package ru.practicum.shareit.handler;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -44,5 +45,11 @@ public class ExceptionGlobalHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleOtherExceptions(Exception exception) {
         return new ErrorResponse("Внутренняя ошибка сервера", exception.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        return new ErrorResponse("Ошибка валидации", exception.getMessage());
     }
 }
