@@ -1,12 +1,12 @@
 package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByItemOwnerIdOrderByStartDesc(Long bookerId);
@@ -29,9 +29,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByBookerIdAndStatusOrderByStartDesc(Long bookerId, Status status);
 
-    Optional<Booking> findFirstByItemIdAndStatusAndStartBeforeOrderByStartDesc(Long itemId, Status status, LocalDateTime start);
-
-    Optional<Booking> findFirstByItemIdAndStatusAndStartAfterOrderByStartAsc(Long itemId, Status status, LocalDateTime start);
+    List<Booking> findAllByItemIdAndStatus(Long itemId, Status status);
 
     boolean existsByBookerIdAndItemIdAndStatusAndEndBefore(Long bookerId, Long itemId, Status status, LocalDateTime end);
+
+    @Query("select count(b) > 0 from Booking b " +
+            "where b.item.id = :itemId " +
+            "and b.status IN (:statuses) " +
+            "and b.start < :end " +
+            "and b.end > :start")
+    boolean hasOverlappingBookings(
+            Long itemId,
+            List<Status> statuses,
+            LocalDateTime start,
+            LocalDateTime end
+    );
 }

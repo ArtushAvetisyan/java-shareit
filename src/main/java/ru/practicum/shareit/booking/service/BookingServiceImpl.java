@@ -47,12 +47,20 @@ public class BookingServiceImpl implements BookingService {
 
         Booking booking = BookingMapper.toBooking(bookingRequestDto, user, item);
         booking.setStatus(Status.WAITING);
+        boolean isBookingExists = bookingRepository.hasOverlappingBookings(item.getId(), List.of(Status.APPROVED, Status.WAITING),
+                booking.getStart(), booking.getEnd());
+
+        if (isBookingExists) {
+            throw new NotAvailableException("Данный предмет уже забронирован в указанный период");
+        }
+
         return BookingMapper.toBookingResponseDto(bookingRepository.save(booking));
     }
 
     @Override
     @Transactional
     public BookingResponseDto approveBooking(long userId, long bookingId, boolean approved) {
+        getUserOrThrow(userId);
         Booking booking = getBookingOrThrow(bookingId);
 
         if (!booking.getItem().getOwner().getId().equals(userId)) {
