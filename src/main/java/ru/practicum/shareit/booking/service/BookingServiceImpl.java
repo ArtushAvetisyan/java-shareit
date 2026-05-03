@@ -60,7 +60,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponseDto approveBooking(long userId, long bookingId, boolean approved) {
-        getUserOrThrow(userId);
+        bookingRepository.findById(bookingId).orElseThrow(() -> new ValidationException("Пользователь с id " + userId + " не является владельцем предмета"));
         Booking booking = getBookingOrThrow(bookingId);
 
         if (!booking.getItem().getOwner().getId().equals(userId)) {
