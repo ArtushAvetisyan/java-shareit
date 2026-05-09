@@ -100,8 +100,7 @@ public class BookingServiceImpl implements BookingService {
 
         List<Booking> bookings = switch (actualState) {
             case ALL -> bookingRepository.findAllByBookerIdOrderByStartDesc(userId, pageable);
-            case CURRENT ->
-                    bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, dateTime, dateTime, pageable);
+            case CURRENT -> bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, dateTime, dateTime, pageable);
             case PAST -> bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, dateTime, pageable);
             case FUTURE -> bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, dateTime, pageable);
             case WAITING -> bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING, pageable);
@@ -121,8 +120,7 @@ public class BookingServiceImpl implements BookingService {
 
         List<Booking> bookings = switch (actualState) {
             case ALL -> bookingRepository.findAllByItemOwnerIdOrderByStartDesc(userId, pageable);
-            case CURRENT ->
-                    bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, dateTime, dateTime, pageable);
+            case CURRENT -> bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, dateTime, dateTime, pageable);
             case PAST -> bookingRepository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(userId, dateTime, pageable);
             case FUTURE -> bookingRepository.findAllByItemOwnerIdAndStartAfterOrderByStartDesc(userId, dateTime, pageable);
             case WAITING -> bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(userId, Status.WAITING, pageable);

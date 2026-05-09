@@ -2,11 +2,15 @@ package ru.practicum.shareit.item.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ItemRequestDto {
 
     @NotBlank(message = "Имя не может быть пустым")
@@ -17,4 +21,6 @@ public class ItemRequestDto {
 
     @NotNull(message = "Доступность должна быть указана")
     private Boolean available;
+
+    private Long requestId;
 }

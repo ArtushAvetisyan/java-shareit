@@ -13,7 +13,7 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 @RestController
 @RequiredArgsConstructor
 @Validated
-@RequestMapping(path = "/requests")
+@RequestMapping("/requests")
 public class ItemRequestController {
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
     private final ItemRequestClient requestClient;
