@@ -28,14 +28,14 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public ResponseEntity<Object> approveBooking(@RequestHeader(USER_ID_HEADER) long userId,
-                                                 @PathVariable long bookingId,
+                                                 @PathVariable @Positive long bookingId,
                                                  @RequestParam boolean approved) {
         return bookingClient.approveBooking(userId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getBookingById(@RequestHeader(USER_ID_HEADER) long userId,
-                                                 @PathVariable long bookingId) {
+                                                 @PathVariable @Positive long bookingId) {
         return bookingClient.getBooking(userId, bookingId);
     }
 
