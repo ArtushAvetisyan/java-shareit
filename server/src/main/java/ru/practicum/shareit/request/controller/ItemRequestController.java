@@ -1,7 +1,6 @@
 package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
@@ -35,7 +34,6 @@ public class ItemRequestController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ItemRequestResponseDto createRequest(@RequestHeader(USER_ID_HEADER) long userId,
                                                 @RequestBody ItemRequestDto itemRequestDto) {
         return requestService.createRequest(userId, itemRequestDto);
