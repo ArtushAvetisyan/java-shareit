@@ -1,17 +1,18 @@
 package ru.practicum.shareit.request;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RequestServiceIntegrationTest {
 
     private final ItemRequestService requestService;
-    private final UserRepository userRepository;
+    private final EntityManager entityManager;
 
     private User requestAuthor;
     private User anotherRequestAuthor;
@@ -30,16 +31,32 @@ public class RequestServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        requestAuthor = userRepository.save(User.builder().name("Pavel").email("pavel@yandex.ru").build());
-        anotherRequestAuthor = userRepository.save(User.builder().name("Vasiliy").email("vasiliy@yandex.ru").build());
-        user = userRepository.save(User.builder().name("Ivan").email("ivan@yandex.ru").build());
+        requestAuthor = User.builder().name("Pavel").email("pavel@yandex.ru").build();
+        anotherRequestAuthor = User.builder().name("Vasiliy").email("vasiliy@yandex.ru").build();
+        user = User.builder().name("Ivan").email("ivan@yandex.ru").build();
 
+        entityManager.persist(requestAuthor);
+        entityManager.persist(anotherRequestAuthor);
+        entityManager.persist(user);
+
+        LocalDateTime now = LocalDateTime.now();
         for (int i = 0; i < 9; i++) {
-            requestService.createRequest(requestAuthor.getId(), ItemRequestDto.builder().description("test " + i).build());
+            ItemRequest request = ItemRequest.builder()
+                    .description("Request description " + i)
+                    .requester(requestAuthor)
+                    .created(now.plusHours(i).withNano(0)).build();
+            entityManager.persist(request);
         }
+
         for (int i = 0; i < 7; i++) {
-            requestService.createRequest(anotherRequestAuthor.getId(), ItemRequestDto.builder().description("another test " + i).build());
+            ItemRequest request = ItemRequest.builder()
+                    .description("Request description " + i)
+                    .requester(anotherRequestAuthor)
+                    .created(now.plusHours(i).withNano(0)).build();
+            entityManager.persist(request);
         }
+        entityManager.flush();
+        entityManager.clear();
     }
 
     @Test
@@ -69,7 +86,7 @@ public class RequestServiceIntegrationTest {
         List<ItemRequestResponseDto> requests = requestService.getAllRequests(user.getId(), 2, 2);
 
         assertThat(requests).hasSize(2);
-        assertThat(requests.getFirst().getDescription()).isEqualTo("another test 4");
+        assertThat(requests.getFirst().getDescription()).isEqualTo("Request description 6");
     }
 
     @Test
