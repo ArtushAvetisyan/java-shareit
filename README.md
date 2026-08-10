@@ -7,140 +7,140 @@
 ![Microservice Architecture](https://img.shields.io/badge/Architecture-Microservices%20%2F%20Gateway-purple?style=flat-square)
 ![Maven Multi-Module](https://img.shields.io/badge/Maven-Multi--Module-red?style=flat-square)
 
-**ShareIt** — это микросервисная платформа для шеринга вещей (экономика совместного использования), позволяющая пользователям публиковать объявления об имеющихся предметах, находить нужные вещи, бронировать их на определенные даты, оставлять отзывы и создавать запросы на поиск редких предметов.
+**ShareIt** — is a microservice platform for item sharing (sharing economy), allowing users to publish listings for available items, find needed items, book them for specific dates, leave reviews, and create requests to find rare items.
 
 ---
 
-## 📋 Оглавление
-- [О сервисе](#-о-сервисе)
-- [Архитектурное устройство](#-архитектурное-устройство)
-- [Состав сервисов и модулей](#-состав-сервисов-и-модулей)
-- [Технологический стек](#-технологический-стек)
-- [Структура базы данных](#-структура-базы-данных)
-- [Бизнес-логика и REST API](#-бизнес-логика-и-rest-api)
-- [Тестирование](#-тестирование)
-- [Инструкция по запуску](#-инструкция-по-запуску)
+## 📋 Table of Contents
+- [About the Service](#-about-the-service)
+- [Architecture](#-architecture)
+- [Service and Module Composition](#-service-and-module-composition)
+- [Technology Stack](#-technology-stack)
+- [Database Structure](#-database-structure)
+- [Business Logic and REST API](#-business-logic-and-rest-api)
+- [Testing](#-testing)
+- [Launch Instructions](#-launch-instructions)
 
 ---
 
-## 📖 О сервисе
+## 📖 About the Service
 
-Сервис **ShareIt** решает проблему временной потребности в вещах и инструментах без необходимости их покупки:
-1. **Шеринг и управление вещами**: Пользователи могут публиковать вещи, задавать их описание и статус доступности для аренды.
-2. **Бронирование с подтверждением**: Аренда вещей на выбранный период с автоматической блокировкой дат и подтверждением от владельца.
-3. **Обратная связь и комментарии**: Возможность оставлять отзывы и оценки после завершения срока аренды.
-4. **Запросы на вещи (Item Requests)**: Создание заявок на поиск вещей, которых еще нет в системе, и возможность ответа на эти запросы другими пользователями.
-
----
-
-## 🏗 Архитектурное устройство
-
-Система спроектирована по микросервисной двухуровневой архитектуре с использованием многомодульного Maven-проекта (**Multi-Module Project**):
-
-1. **`shareIt-gateway` (порт `8080`)**:
-    - Легковесный входной шлюз для первичной валидации всех входящих пользовательских данных (без обращения к БД).
-    - Защищает основной сервер от невалидных запросов, дубликатов и лишней нагрузки.
-    - Транслирует запросы к основному серверу через HTTP/REST с использованием `BaseClient` и `RestTemplate`.
-2. **`shareIt-server` (порт `9090`)**:
-    - Сервер основной бизнес-логики и работы с данными.
-    - Включает JPA-репозитории, сервисы обработки бронирований, поиска и формирования отзывов.
-3. **Организация кода (Feature Layout)**:
-    - Внутри модулей код структурирован по бизнес-фичам: пакетам `item`, `booking`, `request` и `user`.
-4. **DTO и Mapper паттерн**:
-    - Полное разделение внутренних JPA-сущностей и внешних DTO-объектов, передаваемых по REST API.
+The **ShareIt** service solves the problem of a temporary need for items and tools without the need to purchase them:
+1. **Item Sharing and Management**: Users can publish items, provide their descriptions, and set their availability status for rental.
+2. **Booking with Confirmation**: Renting items for a selected period with automatic date blocking and confirmation from the owner.
+3. **Feedback and Comments**: The ability to leave reviews and ratings after the rental period has ended.
+4. **Item Requests**: Creating requests to find items that are not yet in the system, and the ability for other users to respond to these requests.
 
 ---
 
-## 🧩 Состав сервисов и модулей
+## 🏗 Architecture
 
-### 1. Модули многомодульного проекта
-| Модуль | Порт | Назначение и функционал |
+The system is designed using a two-level microservice architecture with a multi-module Maven project (**Multi-Module Project**):
+
+1. **`shareIt-gateway` (port `8080`)**:
+    - A lightweight entry gateway for initial validation of all incoming user data (without accessing the database).
+    - Protects the main server from invalid requests, duplicates, and unnecessary load.
+    - Proxies requests to the main server via HTTP/REST using `BaseClient` and `RestTemplate`.
+2. **`shareIt-server` (port `9090`)**:
+    - The server for core business logic and data processing.
+    - Includes JPA repositories, services for processing bookings, searches, and creating reviews.
+3. **Code Organization (Feature Layout)**:
+    - Inside the modules, the code is structured by business features: `item`, `booking`, `request`, and `user` packages.
+4. **DTO and Mapper Pattern**:
+    - Complete separation of internal JPA entities and external DTO objects transmitted via the REST API.
+
+---
+
+## 🧩 Service and Module Composition
+
+### 1. Multi-Module Project Modules
+| Module | Port | Purpose and Functionality |
 | :--- | :--- | :--- |
-| **`shareIt-gateway`** | `8080` | Валидация входных данных, фильтрация невалидных запросов, проксирование HTTP-запросов к `shareIt-server`. |
-| **`shareIt-server`** | `9090` | Хранение данных, обработка JPA-сущностей, выполнение бизнес-правил бронирования, запросов и отзывов. |
+| **`shareIt-gateway`** | `8080` | Input data validation, filtering of invalid requests, proxying HTTP requests to `shareIt-server`. |
+| **`shareIt-server`** | `9090` | Data storage, processing of JPA entities, execution of business rules for bookings, requests, and reviews. |
 
-### 2. Бизнес-пакеты (Feature Packages)
-| Пакет | Описание | Основной функционал |
+### 2. Business Packages (Feature Packages)
+| Package | Description | Main Functionality |
 | :--- | :--- | :--- |
-| **`user`** | Пользователи | Регистрация, обновление и управление профилями пользователей. |
-| **`item`** | Вещи и Отзывы | Управление предметами, поиск по ключевым словам, просмотр бронирований вещи, добавление комментариев. |
-| **`booking`** | Бронирование | Создание бронирований, смены статусов (`APPROVED`, `REJECTED`), фильтрация по состоянию (`ALL`, `CURRENT`, `PAST`, `FUTURE`, `WAITING`, `REJECTED`). |
-| **`request`** | Запросы вещей | Создание запросов на отсутствующие вещи, просматривание чужих запросов и добавление вещей в ответ на них. |
+| **`user`** | Users | Registration, updating, and management of user profiles. |
+| **`item`** | Items and Reviews | Item management, keyword search, viewing item bookings, adding comments. |
+| **`booking`** | Booking | Creating bookings, changing statuses (`APPROVED`, `REJECTED`), filtering by state (`ALL`, `CURRENT`, `PAST`, `FUTURE`, `WAITING`, `REJECTED`). |
+| **`request`** | Item Requests | Creating requests for missing items, viewing other users' requests, and adding items in response to them. |
 
 ---
 
-## 🛠 Технологический стек
+## 🛠 Technology Stack
 
-- **Язык программирования**: Java 21
-- **Фреймворк**: Spring Boot 3.x (Spring Web, Spring Data JPA, Bean Validation)
-- **Сборка проекта**: Maven Multi-Module (`pom.xml`)
-- **База данных**: PostgreSQL, Hibernate / JPA
-- **Межсервисное взаимодействие**: REST API (`RestTemplate` / `BaseClient`)
-- **Тестирование**: JUnit 5, Mockito, MockMVC, `@JsonTest`, `@SpringBootTest`, Postman
-
----
-
-## 🗄 Структура базы данных
-
-Схема базы данных автоматически разворачивается из файла `schema.sql` в `shareIt-server`:
-
-* **`users`**: Пользователи системы (`id`, `name`, `email` с ограничением `UNIQUE`).
-* **`items`**: Каталог вещей (`id`, `name`, `description`, `is_available`, `owner_id`, `request_id`).
-* **`bookings`**: Заявки на бронирование (`id`, `start_date`, `end_date`, `item_id`, `booker_id`, `status`).
-* **`comments`**: Отзывы арендаторов о вещах (`id`, `text`, `item_id`, `author_id`, `created`).
-* **`requests`**: Запросы на добавление редких вещей (`id`, `description`, `requestor_id`, `created`).
+- **Programming Language**: Java 21
+- **Framework**: Spring Boot 3.x (Spring Web, Spring Data JPA, Bean Validation)
+- **Project Build**: Maven Multi-Module (`pom.xml`)
+- **Database**: PostgreSQL, Hibernate / JPA
+- **Inter-service Communication**: REST API (`RestTemplate` / `BaseClient`)
+- **Testing**: JUnit 5, Mockito, MockMVC, `@JsonTest`, `@SpringBootTest`, Postman
 
 ---
 
-## 💡 Бизнес-логика и REST API
+## 🗄 Database Structure
 
-Во всех запросах, связанных с операциями конкретного пользователя, передается обязательный HTTP-заголовок **`X-Sharer-User-Id`**.
+The database schema is automatically deployed from the `schema.sql` file in `shareIt-server`:
 
-### 1. Пользователи (`/users`)
-| Метод | Эндпоинт | Описание |
-| :--- | :--- | :--- |
-| `POST` | `/users` | Создание нового пользователя. |
-| `PATCH` | `/users/{userId}` | Обновление данных пользователя. |
-| `GET` | `/users/{userId}` | Получение профиля пользователя по ID. |
-| `GET` | `/users` | Получение списка всех пользователей. |
-| `DELETE` | `/users/{userId}` | Удаление пользователя. |
-
-### 2. Вещи и Комментарии (`/items`)
-| Метод | Эндпоинт | Описание |
-| :--- | :--- | :--- |
-| `POST` | `/items` | Добавление новой вещи (с опциональным `requestId`). |
-| `PATCH` | `/items/{itemId}` | Редактирование вещи (только владельцем). |
-| `GET` | `/items/{itemId}` | Просмотр информации о вещи, её отзывах и датах бронирования. |
-| `GET` | `/items` | Просмотр владельцем всех своих вещей. |
-| `GET` | `/items/search?text={text}` | Поиск доступных для аренды вещей по тексту в названии/описании. |
-| `POST` | `/items/{itemId}/comment` | Добавление отзыва пользователем, арендовавшим вещь в прошлом. |
-
-### 3. Бронирование (`/bookings`)
-| Метод | Эндпоинт | Описание |
-| :--- | :--- | :--- |
-| `POST` | `/bookings` | Создание запроса на бронирование (статус `WAITING`). |
-| `PATCH` | `/bookings/{bookingId}?approved={true/false}` | Подтверждение или отклонение бронирования владельцем вещи. |
-| `GET` | `/bookings/{bookingId}` | Получение информации о бронировании (автором или владельцем). |
-| `GET` | `/bookings?state={state}` | Получение списка всех бронирований текущего арендатора. |
-| `GET` | `/bookings/owner?state={state}` | Получение списка бронирований для вещей владельца. |
-
-*Возможные значения `state`*: `ALL` (по умолчанию), `CURRENT`, `PAST`, `FUTURE`, `WAITING`, `REJECTED`.
-
-### 4. Запросы вещей (`/requests`)
-| Метод | Эндпоинт | Описание |
-| :--- | :--- | :--- |
-| `POST` | `/requests` | Создание нового запроса на отсутствующую вещь. |
-| `GET` | `/requests` | Получение списка своих запросов вместе с ответами на них. |
-| `GET` | `/requests/all` | Постраничный просмотр запросов, созданных другими пользователями. |
-| `GET` | `/requests/{requestId}` | Получение данных об отдельном запросе и ответах на него. |
+* **`users`**: System users (`id`, `name`, `email` with a `UNIQUE` constraint).
+* **`items`**: Item catalog (`id`, `name`, `description`, `is_available`, `owner_id`, `request_id`).
+* **`bookings`**: Booking requests (`id`, `start_date`, `end_date`, `item_id`, `booker_id`, `status`).
+* **`comments`**: Renters' reviews of items (`id`, `text`, `item_id`, `author_id`, `created`).
+* **`requests`**: Requests to add rare items (`id`, `description`, `requestor_id`, `created`).
 
 ---
 
-## 🧪 Тестирование
+## 💡 Business Logic and REST API
 
-Проект полностью покрыт комплексом многоуровневых тестов:
+For all requests related to operations of a specific user, the mandatory HTTP header **`X-Sharer-User-Id`** is passed.
 
-1. **Интеграционные тесты (Integration Tests)**: Проверяют сквозное взаимодействие сервисного слоя с базой данных PostgreSQL для ключевых бизнес-методов (например, получение всех вещей владельца).
-2. **WEB-тесты контроллеров (MockMVC)**: Покрывают REST-эндпоинты слоя представления с изолированием сервисов через `@MockBean`.
-3. **Тесты сериализации JSON (`@JsonTest`)**: Проверяют корректность форматирования и сериализации/десериализации сложных DTO-объектов (например, временных меток и вложенных сущностей).
-4. **Postman E2E Tests**: Автоматизированная проверка работоспособности всей системы через API-коллекцию.
+### 1. Users (`/users`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/users` | Creating a new user. |
+| `PATCH` | `/users/{userId}` | Updating user data. |
+| `GET` | `/users/{userId}` | Retrieving a user profile by ID. |
+| `GET` | `/users` | Retrieving the list of all users. |
+| `DELETE` | `/users/{userId}` | Deleting a user. |
+
+### 2. Items and Comments (`/items`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/items` | Adding a new item (with an optional `requestId`). |
+| `PATCH` | `/items/{itemId}` | Editing an item (by the owner only). |
+| `GET` | `/items/{itemId}` | Viewing information about an item, its reviews, and booking dates. |
+| `GET` | `/items` | Viewing all of the owner's items. |
+| `GET` | `/items/search?text={text}` | Searching for items available for rental by text in the name/description. |
+| `POST` | `/items/{itemId}/comment` | Adding a review by a user who rented the item in the past. |
+
+### 3. Booking (`/bookings`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/bookings` | Creating a booking request (status `WAITING`). |
+| `PATCH` | `/bookings/{bookingId}?approved={true/false}` | Confirming or rejecting a booking by the item owner. |
+| `GET` | `/bookings/{bookingId}` | Retrieving booking information (by the author or owner). |
+| `GET` | `/bookings?state={state}` | Retrieving the list of all bookings of the current renter. |
+| `GET` | `/bookings/owner?state={state}` | Retrieving the list of bookings for the owner's items. |
+
+*Possible `state` values*: `ALL` (default), `CURRENT`, `PAST`, `FUTURE`, `WAITING`, `REJECTED`.
+
+### 4. Item Requests (`/requests`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/requests` | Creating a new request for a missing item. |
+| `GET` | `/requests` | Retrieving the list of one's own requests together with responses to them. |
+| `GET` | `/requests/all` | Paginated viewing of requests created by other users. |
+| `GET` | `/requests/{requestId}` | Retrieving data about an individual request and its responses. |
+
+---
+
+## 🧪 Testing
+
+The project is fully covered by a comprehensive set of multi-level tests:
+
+1. **Integration Tests**: Verify end-to-end interaction of the service layer with the PostgreSQL database for key business methods (for example, retrieving all items owned by a user).
+2. **Controller WEB Tests (MockMVC)**: Cover REST endpoints of the presentation layer with services isolated via `@MockBean`.
+3. **JSON Serialization Tests (`@JsonTest`)**: Verify correct formatting and serialization/deserialization of complex DTO objects (for example, timestamps and nested entities).
+4. **Postman E2E Tests**: Automated verification of the entire system's functionality through an API collection.
